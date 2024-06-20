@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Downloader</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff;
+    text-align: center;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+form {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 300px;
+}
+
+input[type="text"] {
+    width: 90%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 10px;
+    font-size: 1em;
+}
+
+button {
+    background: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button i {
+    margin-right: 5px;
+}
+
+button:hover {
+    background: #45a049;
+}
+
+#result {
+    margin-top: 20px;
+    max-width: 600px;
+    word-wrap: break-word;
+    text-align: left;
+}
+
+audio {
+    margin-top: 20px;
+    width: 100%;
+    border-radius: 5px;
+}
+
+.lyrics-container {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 5px;
+    overflow: auto;
+    max-height: 200px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-top: 10px;
+}
+
+.download-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background: #ff5722;
+    color: white;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 1em;
+    transition: background 0.3s ease;
+}
+
+.download-button:hover {
+    background: #e64a19;
+}
+
+.download-button i {
+    margin-right: 5px;
+}
+
+footer {
+    margin-top: auto;
+    padding: 20px 0;
+    background: rgba(0, 0, 0, 0.2);
+    width: 100%;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+    
+    form {
+        width: 100%;
+    }
+    
+    h1 {
+        font-size: 2em;
+    }
+    }
+    
+    </style>
+<body>
+    <h1><i class="fa-brands fa-spotify"></i> Spotify</h1>
+    <form id="spotify-form">
+        <input type="text" id="title" name="title" placeholder="Enter song title" required>
+        <button type="submit"><i class="fas fa-paper-plane"></i> Search</button>
+    </form>
+    <div id="result"></div>
+
+    <footer>
+        © 2024 | HeruDev | All rights reserved.
+    </footer>
+
+    <script>
+        document.getElementById('spotify-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const title = document.getElementById('title').value;
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('/spotify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title })
+                });
+
+                if (!response.ok) throw new Error(await response.text());
+
+                const data = await response.json();
+                resultDiv.innerHTML = `
+                    <h2> ${data.title} - ${data.artist} </h2>
+                    <div class="lyrics-container">${data.lyrics}</div>
+                    <a href="${data.downloadLink}" class="download-button" target="_blank"><i class="fas fa-download"></i> Download</a>
+                    <audio controls>
+                        <source src="${data.localFilePath}" type="audio/mpeg">
+                    </audio>
+                `;
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        });
+    </script>
+</body>
+</html>
